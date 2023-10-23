@@ -1,0 +1,254 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>김창민의 영화검색 pr</title>
+
+    <style>
+        .M_card {
+            height: 600px;
+            width: 300px;
+        }
+
+        .hiegh_low {
+            display: none;
+        }
+    </style>
+
+</head>
+
+<body>
+    <div>영화검색
+        <div id="input_text">
+            <input type="text" id="search_movie">
+            <button onclick="find_movie_fuc()">검색</button>
+            <button onclick="start_page()">처음으로</button>
+            <button onclick="up_and_down()">더 높게 더 낮게 게임하기</button>
+            <span class="hiegh_low"> 오른쪽이 더 <button onclick="hiegh()">높다</button>
+                <button onclick="low()">낮다</button></span>
+
+        </div>
+    </div>
+
+
+
+    <div class="M_card" id="movie_card">
+    </div>
+    <div class="R_card" id="random_card">
+    </div>
+
+
+
+    <script>
+        let f;//fetch의 값 저장하는 변수
+        let mode = 1;//검색을 눌렀을때 인지 구분하는 변수
+        let game_mode = 0;//게임이 시작했는지
+        let check_heigh_low;
+        function make_card(monvie_information, pos) {//영화카드를 띄우는 함수 monvie_information=f
+            let card = document.getElementById("movie_card");//영화 카드의 배경부분     
+            let game_visible = document.querySelector(".hiegh_low");//게임 버튼에 접근
+            let i = 0;//카드의 id번호를 지정하는 변수
+            let game_score=0;
+            
+            if (pos == 1) {
+               
+                monvie_information.forEach(element => {
+                    let span_tag_card = document.createElement("span");//span태그 생성
+                    span_tag_card.setAttribute("id", `${i}_card`)
+                    card.appendChild(span_tag_card);
+
+                    let all_card_in = `
+
+          <div onclick="say_card_id( ${element["id"]})" style="background-color:greenyellow;>
+           <span id="movie_card_poster"  >
+            <img src="https://image.tmdb.org/t/p/w300${element["poster_path"]}" alt="...">
+            </span>
+            <span id="movie_card_title">  <h2>${element["title"]}</h2>
+                </span>
+            
+            <span id="movie_card_text">
+              ${element["overview"]}
+               </span>
+               <span id="movie_card_vote_average">   
+               평점 ${element["vote_average"]}
+            </span>
+        </span>
+        </div>
+               `;
+                    span_tag_card.innerHTML = all_card_in;
+                    i++;
+                });
+            }
+
+            if (pos == 2) {//검색 눌럿을때
+                
+                game_visible.style.display = "none";
+                let find_movie_val = document.getElementById("search_movie").value;
+                //for 문돌리고 filter로 맞는거만 꺼내기
+
+                let none_title_num = [];
+                for (let num = 0; num < monvie_information.length; num++) {
+                    if ((monvie_information[num]["title"].toLowerCase()).indexOf(find_movie_val.toLowerCase()) > -1) { //대소문자 구분없이 검색
+                        none_title_num[num] = num;
+                    }
+                    // monvie_information[num]["title"].indexOf(find_movie_val); //문자열 에서 문자 찾기
+                }
+                let ntn = none_title_num.filter(
+                    (element, index) => element != undefined
+                );
+                //filter로 맞는거 꺼내고 나머지는 dispay none으로 변경하기
+
+                for (let k = 0; k < monvie_information.length; k++) {
+                    document.getElementById(`${k}_card`).style.display = "none"
+                }
+                ntn.forEach((element) => {
+                    document.getElementById(`${element}_card`).style.display = "block";
+                });
+            }
+            if (pos == 3) {// 다시 보이기
+                game_visible.style.display = "none";
+                document.getElementById("movie_card").style.display = "block"
+                document.getElementById("random_card").style.display = "none";
+                for (let k = 0; k < monvie_information.length; k++) {
+                    document.getElementById(`${k}_card`).style.display = "block";
+                }
+
+            }
+            if (pos == 4) {//더높게 더 낮게
+                
+                game_visible.style.display = "block";//게임버튼 보이게
+                document.getElementById("movie_card").style.display = "none";//다른 카드 안보이기
+                let random_M_C = document.getElementById("random_card");//랜덤 카드에 접근하는 변수 생성
+                random_M_C.style.display = "block";//랜덤카드 보이게 하기
+                let left_post_num = rand(0, monvie_information.length - 1);//좌측 랜덤카드 번호 생성
+                let = right_post_num = rand(0, monvie_information.length - 1);//우측 랜덤 카드 생성
+                let equir = false;//좌우가 같은
+                while (!equir) {
+                    if (right_post_num == left_post_num) {
+                        right_post_num = rand(0, monvie_information.length - 1);
+                        equir = false;
+                    }
+                    else {
+                        equir = true;
+                    }
+                }
+                if (game_mode == 0) {//게임을 처음 실행 했을 때
+                   
+
+                    let left_random_card_tag = document.createElement("span");//span태그 생성
+                    
+                    left_random_card_tag.setAttribute("id", `random_${left_post_num}_card`)//
+                    random_M_C.appendChild(left_random_card_tag);//위에서 생성한 객체를 랜덤카드의 자식으로 해줌
+
+                    let left_post = `  <span id="movie_card_poster"  >
+            <img src="https://image.tmdb.org/t/p/w300${monvie_information[left_post_num]["poster_path"]}" alt="...">
+            </span>`
+                    left_random_card_tag.innerHTML = left_post;
+
+                    let right_random_card_tag = document.createElement("span");//span태그 생성
+                    right_random_card_tag.setAttribute("id", `random_${right_post_num}_card`)//
+                    random_M_C.appendChild(right_random_card_tag);//위에서 생성한 객체를 랜덤카드의 자식으로 해줌
+
+                    let right_post = `  <span id="movie_card_poster"  >
+            <img src="https://image.tmdb.org/t/p/w300${monvie_information[right_post_num]["poster_path"]}" alt="...">
+            </span>`
+                    right_random_card_tag.innerHTML = right_post;
+                    game_mode = 1;
+                }
+              
+                    if (check_heigh_low == 0) {
+                        
+                        if (monvie_information[right_post_num]["popularity"] > monvie_information[left_post_num]["popularity"]) {
+                            console.log("정답");
+                            game_score++;
+                        }
+                        else{
+                            console.log("오답");
+
+                            game_score=0;
+                            check_heigh_low=3;
+                        }
+                    }
+                    if (check_heigh_low == 1) {
+                        if (monvie_information[right_post_num]["popularity"] < monvie_information[left_post_num]["popularity"]) {
+                            console.log("정답");
+                            game_score++;
+                        }
+                        else{
+                            console.log("오답");
+                            game_score=0;
+                            check_heigh_low=3;
+                        }
+                    
+                }
+            }
+        }
+        function rand(min, max) {//랜덤 수를 얻는 함수
+            return Math.floor(Math.random() * (max - min + 1)) + min;
+        }
+
+        function start_page() {
+            check_heigh_low=3;
+            mode = 3;
+            fetch_data();
+        }
+
+        function find_movie_fuc() {//검색 기능
+            check_heigh_low=3;
+            mode = 2;
+            fetch_data();
+
+        }
+        function say_card_id(card_id) {//아이디를 alert으로 띄우는 함수
+            alert(card_id);
+        }
+
+        function up_and_down() {
+            mode = 4;
+            fetch_data();
+        }
+        function hiegh() {
+            mode = 4;
+            game_mode = 1;
+            check_heigh_low = 0;//높다 눌럿을떄
+            fetch_data();
+        }
+        function low() {
+            mode = 4;
+            game_mode = 1;
+            check_heigh_low = 1;//낮다 눌렀을때
+            fetch_data();
+        }
+
+
+
+
+
+        const options = {
+            method: 'GET',
+            headers: {
+                accept: 'application/json',
+                Authorization: 'Bearer eyJhbGciOiJIUzI1NiJ9.eyJhdWQiOiJkMDVjYzE4YTk5Y2U4MTc1Y2I4YTI2YjRmMzhkNjkxMCIsInN1YiI6IjY1MmY0OWU4MDI0ZWM4MDEwMTU0MTkyYyIsInNjb3BlcyI6WyJhcGlfcmVhZCJdLCJ2ZXJzaW9uIjoxfQ.fn5pNmujTnJOpP-y8uUDOYk0DX44yKCTXfaPIpm3a1M'
+            }
+        };
+
+        function fetch_data() {
+            return fetch('https://api.themoviedb.org/3/movie/top_rated?language=en-US&page=1', options)
+                .then(async (response) =>
+                    await response.json()).then(val => {
+                        f = val["results"];
+                        make_card(f, mode);
+                        return f;
+                    }
+
+                    )
+                .catch(err => console.error(err));
+        }
+        fetch_data();
+
+    </script>
+</body>
+
+</html>
