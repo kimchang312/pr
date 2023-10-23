@@ -14,7 +14,7 @@
             gap: 20px;
             height: 500px;
             width: 100%;
-            
+           
         }
 
         .hiegh_low {
@@ -78,10 +78,10 @@
             if (pos == 1) {
 
                 monvie_information.forEach(element => {
-                    let span_tag_card = document.createElement("div");//span태그 생성
-                    span_tag_card.setAttribute("id", `${i}_card`)
-                    card.appendChild(span_tag_card);
-
+                    let div_tag_card = document.createElement("div");//div태그 생성
+                    div_tag_card.setAttribute("id", `${i}_card`)
+                    card.appendChild(div_tag_card);
+                    div_tag_card.style.backgroundColor="green";
                     let all_card_in = `
 
           <div onclick="say_card_id( ${element["id"]})" >
@@ -100,7 +100,7 @@
         </div>
         </div>
                `;
-                    span_tag_card.innerHTML = all_card_in;
+                    div_tag_card.innerHTML = all_card_in;
                     i++;
                 });
             }
